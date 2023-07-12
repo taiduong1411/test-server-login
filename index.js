@@ -35,7 +35,7 @@ app.post('/api/user/register', async(req, res, next) => {
     }
 });
 app.post('/api/user/login', async(req, res, next) => {
-    const { phone } = req.body;
+    const { phone, password } = req.body;
     try {
         await User.findOne({ phone: phone }).then(async user => {
             if (!user) {
@@ -44,7 +44,7 @@ app.post('/api/user/login', async(req, res, next) => {
                 if (password == user.password) {
                     return res.status(200).json({ success: false, record: user })
                 } else {
-                    return res.status(200).json({ success: false, msg: "Password Incorrect !!!" })
+                    return res.status(300).json({ success: false, msg: "Password Incorrect !!!" })
                 }
             }
         })
