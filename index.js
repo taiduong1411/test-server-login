@@ -42,7 +42,7 @@ app.post('/api/user/login', async(req, res, next) => {
                 return res.status(300).json({ success: false, msg: "Account is not found" })
             } else {
                 if (password == user.password) {
-                    return res.status(200).json({ success: false, record: user })
+                    return res.status(200).json({ success: true, record: user })
                 } else {
                     return res.status(300).json({ success: false, msg: "Password Incorrect !!!" })
                 }
@@ -52,19 +52,7 @@ app.post('/api/user/login', async(req, res, next) => {
         return res.status(500).json({ success: false, msg: 'Server error !' })
     }
 });
-app.get('/api/user/list-user', async(req, res, next) => {
-    try {
-        await User.find().lean().then(async users => {
-            if (!users) {
-                return res.status(300).json({ success: false, msg: "Khong tim thay tai khoan" });
-            } else {
-                return res.status(200).json({ success: true, record: users });
-            }
-        })
-    } catch (error) {
-        return res.status(500).json({ success: false, msg: "Server Error" });
-    }
-})
+
 
 
 
