@@ -4,16 +4,18 @@ const port = 8000;
 const database = require('./database');
 const User = require('./User');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 database.connect();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+app.use(cors());
 
 
 
-app.post('/api/user/register', async(req, res, next) => {
+app.post('/api/user/register', async (req, res, next) => {
     const { fullname, phone, email, password } = req.body;
     try {
         await User.findOne({ phone: phone }).then(async user => {
@@ -34,7 +36,7 @@ app.post('/api/user/register', async(req, res, next) => {
         return res.status(500).json({ success: false, msg: 'Server error !' })
     }
 });
-app.post('/api/user/login', async(req, res, next) => {
+app.post('/api/user/login', async (req, res, next) => {
     const { phone, password } = req.body;
     try {
         await User.findOne({ phone: phone }).then(async user => {
