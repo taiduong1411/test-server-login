@@ -4,7 +4,7 @@ const uri_atlas = "mongodb+srv://taiduong:taiduong1411@taiduong.28espap.mongodb.
 async function connect() {
     try {
         await mongoose.set('strictQuery', true);
-        await mongoose.connect(uri_compass, {
+        await mongoose.connect(uri_atlas, {
             useNewUrlParser: true
         })
         console.log('connect db success')
