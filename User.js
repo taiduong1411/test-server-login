@@ -1,5 +1,15 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
+// const accessToken = new Schema({
+//     token: {
+//         type: String,
+//         default: ''
+//     },
+//     createAt: {
+//         type: Date,
+//         expires: 60 * 1 // 15 minutes
+//     }
+// })
 
 const UserModel = new Schema({
     fullname: {
@@ -14,6 +24,11 @@ const UserModel = new Schema({
     },
     email: {
         type: String
+    },
+    refreshToken: {
+        type: String,
+        default: '',
+        unique: true
     }
 
 });

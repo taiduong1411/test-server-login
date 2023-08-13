@@ -20,8 +20,12 @@ app.use(cors());
 app.use(cookieParser());
 
 
+//function
 
-app.post('/api/user/register', async(req, res, next) => {
+
+
+
+app.post('/api/user/register', async (req, res, next) => {
     const { fullname, phone, email, password } = req.body;
     try {
         await User.findOne({ phone: phone }).then(async user => {
@@ -30,7 +34,8 @@ app.post('/api/user/register', async(req, res, next) => {
                     fullname: fullname,
                     phone: phone,
                     email: email,
-                    password: password
+                    password: password,
+
                 }
                 await User(data).save()
                 return res.status(200).json({ success: true, record: data })
@@ -42,19 +47,28 @@ app.post('/api/user/register', async(req, res, next) => {
         return res.status(500).json({ success: false, msg: 'Server error !' })
     }
 });
-app.post('/api/user/login', async(req, res, next) => {
+app.post('/api/user/login', async (req, res, next) => {
     const data = { phone, password } = req.body;
-    const accessToken = jwt.sign(data, 'taiduong', {
-        expiresIn: '30s',
-    });
+
     try {
         await User.findOne({ phone: phone }).then(async user => {
             if (!user) {
                 return res.status(300).json({ success: false, msg: "Account is not found" })
             } else {
                 if (password == user.password) {
-                    res.cookie('jwt', accessToken, { maxAge: 1000 * 60 * 60, httpOnly: true })
-                    return res.status(200).json({ success: true, record: user, accessToken })
+                    const accessToken = jwt.sign({
+                        phone: user.phone,
+                        email: user.email,
+                        fullname: user.fullname
+                    }, 'taiduong', {
+                        expiresIn: '86400s',
+                    });
+
+                    const refreshToken = (Math.random() + 1).toString(36).substring(2);
+                    user.refreshToken = refreshToken
+                    user.save()
+                    // res.cookie('jwt', accessToken, { maxAge: 1000 * 30, httpOnly: true })
+                    return res.status(200).json({ success: true, record: user, accessToken, refreshToken })
                 } else {
                     return res.status(300).json({ success: false, msg: "Password Incorrect !!!" })
                 }
@@ -64,7 +78,7 @@ app.post('/api/user/login', async(req, res, next) => {
         return res.status(500).json({ success: false, msg: 'Server error !' })
     }
 });
-app.get('/api/user/all-user', authenToken, async(req, res, next) => {
+app.get('/api/user/all-user', authenToken, async (req, res, next) => {
     try {
         await User.find().lean().then(async users => {
             if (!users) return res.status(300).json({ success: false, msg: "no user" })
@@ -77,9 +91,32 @@ app.get('/api/user/all-user', authenToken, async(req, res, next) => {
         return res.status(500).json({ success: false, msg: "Server error" })
     }
 })
-app.get('/api/user/logout', authenToken, async(req, res, next) => {
-    await res.clearCookie("jwt");
+app.get('/api/user/logout', authenToken, async (req, res, next) => {
+    console.log('logout success');
     return res.status(200).json({ success: true, msg: "logout" })
+})
+app.post('/api/user/refreshToken', async (req, res, next) => {
+    const refreshToken = req.body
+    // console.log(refreshToken);
+
+    await User.findOne({ refreshToken: refreshToken.refreshToken }).then(user => {
+        if (!user) {
+            // console.log('pass');
+            return res.status(300).json({ success: false, msg: 'refresh Token invalid' })
+        } else {
+            // console.log(user);
+            const data = {
+                phone: user.phone,
+                email: user.email,
+                fullname: user.fullname
+            }
+            const accessToken = jwt.sign(data, 'taiduong', {
+                expiresIn: '86400s',
+            });
+            return res.status(200).json({ success: true, accessToken: accessToken })
+        }
+    })
+
 })
 
 app.listen(port, () => {

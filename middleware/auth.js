@@ -1,17 +1,19 @@
 const jwt = require('jsonwebtoken');
-
+const jwt_decode = require('jwt-decode')
 module.exports = function authenToken(req, res, next) {
-    // const authorizationClient = req.headers['authorization'];
-    // const token = authorizationClient && authorizationClient.split(' ')[1]
-    const token = req.cookies.jwt;
+    const token = req.headers['authorization'];
     if (!token) {
-        return res.sendStatus(401)
-    } else {
-        try {
-            jwt.verify(token, 'taiduong')
-            next();
-        } catch (e) {
-            return res.sendStatus(403)
-        }
+        return res.status(404).json({
+            message: 'Token is valid'
+        })
     }
+    jwt.verify(token, 'taiduong', function (err) {
+        if (err) {
+            // console.log(err);
+            return res.status(401).send('err')
+        }
+        else {
+            next();
+        }
+    });
 }
